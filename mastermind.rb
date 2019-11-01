@@ -93,6 +93,16 @@ class Intro
     end
   end
 
+  def replay_prc(&block)
+    replay = true
+    while replay == true
+      puts "Play again?"
+      play_again = gets.chomp
+      # replay = false
+      play_again.upcase == "Y" || "YES" ? replay = true : replay = false
+    end
+  end
+
   def start_game
     get_name
     get_role
@@ -107,6 +117,102 @@ class Intro
   end
 end
 
+
+class HumanSolver
+  attr_writer :sol_length, :max_guesses, :name
+
+  def initialize(sol_length, max_guesses, name)
+    @sol_length = sol_length
+    @max_guesses = max_guesses
+    @name = name
+
+    generate_code
+    get_guesses_intro
+    get_guesses
+  end
+
+  def generate_code
+    @solution = []
+    while @solution.size < @sol_length
+      rnum = rand(5) + 1
+      if @solution.include?(rnum)
+      else
+        @solution.push(rnum)
+      end
+    end
+  end
+
+  def get_guesses_intro
+    puts %Q(
+
+      Mastermind codes are composed of a sequence of the 
+      following numbers:
+
+      #{"1, 2, 3, 4, 5, 6".red}
+
+      In this version of Mastermind, each digit in the
+      solution is unique.  In other words, the solution
+      will not include the same digit value more than once.
+
+      The solution contains #{@sol_length} digits.
+      )
+  end
+
+  def compare
+    @comp_result = Array.new
+    @guess.each_with_index do |c, index|
+      if c == @solution[index]
+        @comp_result.push("•".green)
+      elsif @solution.include?c
+        @comp_result.push("•")
+      else
+        @comp_result.push("•".red)
+      end
+    end
+    puts @comp_result.join("")
+    puts @guess.join("")
+    if @guess == @solution
+      puts "You won!"
+      @game_over = true
+    end
+  end
+
+    
+    def get_guesses
+      i = 0
+      @game_over = false
+      while i < @max_guesses && @game_over == false
+        valid_input = false
+        while valid_input == false
+          puts "Enter a guess containing #{@sol_length} digits.  You have #{@max_guesses - i} attempt(s) remaining."
+          @guess = gets.chomp.split("").map! { |num| num.to_i }
+          if @guess.uniq.size == @sol_length && (([1, 2, 3, 4, 5, 6] - @guess).size == (6 - @sol_length))
+            valid_input = true
+          else puts "Invalid guess -- try again."
+          end
+        end
+        compare
+        i += 1
+      end
+      replay_question
+    end
+  
+    def replay_question
+      puts %Q(
+        Would you like to play another round, #{@name}?
+        1 = Yes
+        2 = No
+        )
+      answer = gets.chomp.to_i
+      if answer == 1
+        Intro.new
+      elsif answer == 2
+        puts "Good game, #{@name}.  See you again soon!"
+      end
+    end
+  
+
+end
 
 class ComputerSolver
   attr_accessor :max_guesses
