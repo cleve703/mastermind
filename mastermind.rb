@@ -1,5 +1,6 @@
 class ComputerSolver
-  attr_accessor :max_guesses, :solution
+  attr_accessor :max_guesses
+  attr_writer :solution
 
   def initialize(max_guesses, solution)
     
@@ -7,29 +8,33 @@ class ComputerSolver
     @solution = solution.to_s.split('').map(&:to_i)
     @untested_pairs = {}
     (0...@solution.size).each { |num| @untested_pairs[num] = (1..6).to_a}
-    # untested_pairs[guess1-6] = 0-4 index in guess
+
     @guesses = []
     @solution.size.times {@guesses.push(0)}
     @confirmed_values = {}
-    # confirmed_values[guess1-6] = 0-4 index in guess
-    @eval_result = []
 
-    puts "max_guesses: #{@max_guesses} solution: #{@solution} empty guesses: #{@guesses}"
+    @eval_result = []
+    @game_active = true
+
     solution_sequence
 
   end
 
   def solution_sequence
     i = 1
-    while i <= @max_guesses
+    while i <= @max_guesses && @game_active == true
       reset_guesses
       insert_confirmed_guesses(@guesses)
       random_guesses(@guesses)
       evaluate_guesses(@guesses)
+      puts "============================"
+      puts ""
       puts "Guess ##{i}:"
+      sleep(1)
       puts @guesses.join("")
       puts @eval_result.join("")
-      puts( @untested_pairs.map{ |k,v| "#{k} => #{v}" }.sort )
+      win_or_lose(i)
+      puts ""
       i += 1
     end
   end
@@ -53,8 +58,13 @@ class ComputerSolver
     @guesses.each_with_index do |num, index|
       if num == 0
         validated = false
+        i = 0
         while validated == false
           guess = @untested_pairs[index][rand(@untested_pairs[index].size)] unless @untested_pairs[index] == nil
+          if i > 5
+            break
+          end
+          i += 1
           if @guesses.include?(guess)
             next
           else
@@ -85,6 +95,13 @@ class ComputerSolver
     end
   end
 
+  def win_or_lose(i)
+    if @eval_result.join("") == "+" * @solution.size
+      puts "Computer won in #{i} attempts!"
+      @game_active = false
+    end
+  end
+
 end
 
-ComputerSolver.new(6, 4362)
+ComputerSolver.new(6, 14362)
