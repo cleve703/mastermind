@@ -29,6 +29,7 @@ class ComputerSolver
       puts "Guess ##{i}:"
       puts @guesses.join("")
       puts @eval_result.join("")
+      puts( @untested_pairs.map{ |k,v| "#{k} => #{v}" }.sort )
       i += 1
     end
   end
@@ -74,14 +75,14 @@ class ComputerSolver
         @eval_result.push("+")
         @confirmed_values[guess] = index
         @untested_pairs.delete(index)
+        @untested_pairs.each { |k, v| v.delete(guess) }
       elsif @solution.include?(guess)
         @eval_result.push("*")
       else
         @eval_result.push("-")
-        @untested_pairs.delete_if { |k, v| v == guess }
+        @untested_pairs.each { |k, v| v.delete(guess) }
       end
     end
-    puts( @untested_pairs.map{ |k,v| "#{k} => #{v}" }.sort )
   end
 
 end
